@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Intercambio navideño de la familia: escribe tu nombre y tres opciones de regalo de hasta $1,000 pesos y mira lo que quiere cada quien.">
+<meta property="og:title" content="Intercambio de regalos">
+<meta property="og:description" content="Escribe tu nombre y al menos tres opciones de regalo (tope: $1,000 pesos) y mira lo que quiere la persona que te tocó.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8E%81%3C/text%3E%3C/svg%3E">
+<title>Intercambio Navideño</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Layout: one centered column; evergreen banner, paper sheet with the survey,
+     then "a quién le regalas" with that person's wishes, then everyone's lists as cards. */
+  :root {
+    --bg: #f6f3ec; --sheet: #fffdf8; --fg: #22302a; --muted: #5f6c66; --line: #d9d4c7;
+    --pine: #163b2c; --pine-fg: #f4f0e4; --berry: #b1262f; --berry-fg: #ffffff; --gold: #c9a24a;
+    --mine: #e9f4ea; --error: #b1262f; --focus: #2d7a52; --link: #1c5a8e;
+    --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+    --body: "Nunito", "Segoe UI", -apple-system, system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121a16; --sheet: #1b2520; --fg: #ecefe8; --muted: #a2ada5; --line: #33423a;
+      --pine: #0f2b20; --pine-fg: #f4f0e4; --berry: #e2525b; --berry-fg: #ffffff; --gold: #d9b45e;
+      --mine: #1f3a2a; --error: #ff8a90; --focus: #6fc694; --link: #8cc4f0;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121a16; --sheet: #1b2520; --fg: #ecefe8; --muted: #a2ada5; --line: #33423a;
+    --pine: #0f2b20; --pine-fg: #f4f0e4; --berry: #e2525b; --berry-fg: #ffffff; --gold: #d9b45e;
+    --mine: #1f3a2a; --error: #ff8a90; --focus: #6fc694; --link: #8cc4f0;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.55; }
+  a { color: var(--link); }
+
+  .banner { background: var(--pine); color: var(--pine-fg); }
+  .banner-inner, .sheet-wrap {
+    max-width: 640px; margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .banner-inner { padding-block: 2.2rem 2rem; display: grid; gap: .9rem; }
+  .eyebrow { font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin: 0; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 6vw, 2.9rem); line-height: 1.08; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.15; margin: 0; text-wrap: balance; }
+  .lede { margin: 0; max-width: 34em; opacity: .92; }
+  .budget {
+    display: inline-flex; align-items: baseline; gap: .55rem; flex-wrap: wrap;
+    background: var(--berry); color: var(--berry-fg); padding: .65rem 1rem; border-radius: 12px; width: fit-content; max-width: 100%;
+  }
+  .budget .amt { font-family: var(--display); font-size: 1.6rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .budget .lbl { font-weight: 700; font-size: .95rem; }
+
+  .sheet-wrap { padding-block: 1.6rem 3rem; display: grid; gap: 1.8rem; }
+  .sheet {
+    background: var(--sheet); border: 1px solid var(--line); border-radius: 16px;
+    padding: 1.4rem clamp(1rem, 4vw, 1.8rem) 1.6rem; display: grid; gap: 1.4rem;
+  }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: .75rem; }
+  legend, .label { font-weight: 800; font-size: 1rem; padding: 0; margin: 0; }
+  .hint { color: var(--muted); font-size: .9rem; margin: 0; }
+  label { display: grid; gap: .3rem; font-weight: 700; font-size: .92rem; }
+  label .sub { font-weight: 400; color: var(--muted); }
+  input[type="text"], input[type="url"] {
+    width: 100%; min-width: 0; font: inherit; font-size: 1rem; color: var(--fg);
+    background: var(--bg); border: 1.5px solid var(--line); border-radius: 10px; padding: .7rem .85rem;
+  }
+  input:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
+  input[aria-invalid="true"] { border-color: var(--error); }
+
+  .options { display: grid; gap: .9rem; }
+  .option { border: 1px solid var(--line); border-radius: 12px; padding: .9rem .95rem 1rem; display: grid; gap: .65rem; }
+  .option-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+  .option-head .n { font-family: var(--display); font-weight: 700; font-size: 1.1rem; }
+  .option-head .n small { font-family: var(--body); font-weight: 600; color: var(--muted); font-size: .8rem; margin-left: .4rem; }
+  .remove, .del {
+    font: inherit; font-size: .85rem; font-weight: 700; color: var(--muted);
+    background: none; border: 0; padding: .2rem .4rem; cursor: pointer; border-radius: 6px;
+  }
+  .remove:hover, .remove:focus-visible, .del:hover, .del:focus-visible { color: var(--berry); outline: 2px solid var(--focus); }
+  .err { color: var(--error); font-size: .85rem; font-weight: 700; margin: 0; }
+  .err:empty { display: none; }
+
+  .row { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; }
+  button.btn {
+    font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer; border-radius: 999px; padding: .8rem 1.3rem;
+    border: 1.5px solid transparent; display: inline-flex; align-items: center; gap: .5rem; min-width: 0;
+  }
+  button.btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .btn-ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--fg); }
+  .btn-main { background: var(--pine); color: var(--pine-fg); }
+  .btn-main:hover { filter: brightness(1.15); }
+  .btn[disabled] { opacity: .55; cursor: not-allowed; }
+  .status { font-weight: 700; font-size: .9rem; color: var(--focus); margin: 0; min-height: 1.3em; }
+  .status.bad { color: var(--error); }
+  .notice { border: 1.5px dashed var(--line); border-radius: 12px; padding: .8rem 1rem; margin: 0; color: var(--muted); font-size: .92rem; }
+
+  .list-head { display: grid; gap: .35rem; }
+  .list-head .hint { max-width: 36em; }
+  .search { display: grid; gap: .3rem; }
+  .group-title { font-weight: 800; font-size: 1rem; margin: 0 0 .4rem; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .97rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .78rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  td.to { font-weight: 700; }
+  tr.hit td { background: var(--mine); }
+  .no-match { color: var(--muted); font-size: .9rem; margin: .4rem 0 0; }
+  .no-match:empty { display: none; }
+  details { border-top: 1px solid var(--line); padding-top: .8rem; }
+  summary { cursor: pointer; font-weight: 800; }
+
+  .count { color: var(--muted); font-weight: 700; font-size: .9rem; font-variant-numeric: tabular-nums; margin: 0; }
+  .cards { display: grid; gap: .9rem; margin-top: .9rem; }
+  .card { background: var(--sheet); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.1rem 1.1rem; display: grid; gap: .55rem; min-width: 0; }
+  .card.mine { background: var(--mine); border-color: var(--focus); }
+  .card.target { border: 2px solid var(--gold); }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+  .card-head .who { font-family: var(--display); font-weight: 700; font-size: 1.25rem; overflow-wrap: anywhere; min-width: 0; }
+  .card-head .who .chip { font-family: var(--body); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--focus); margin-left: .5rem; }
+  .card-head .gives { font-size: .85rem; color: var(--muted); font-weight: 700; }
+  .card ol { margin: 0; padding-left: 1.3rem; display: grid; gap: .3rem; }
+  .card li { overflow-wrap: anywhere; }
+  .card li a { font-size: .9rem; }
+  .card .when { color: var(--muted); font-size: .8rem; margin: 0; }
+  .empty-state { background: var(--sheet); border: 1.5px dashed var(--line); border-radius: 14px; padding: 1.4rem 1.1rem; text-align: center; color: var(--muted); margin: 0; }
+
+  .target-box { background: var(--sheet); border: 2px solid var(--gold); border-radius: 16px; padding: 1.2rem clamp(1rem, 4vw, 1.6rem); display: grid; gap: .8rem; }
+  .target-box .big { font-family: var(--display); font-size: 1.5rem; font-weight: 700; margin: 0; line-height: 1.2; }
+  .target-box ol { margin: 0; padding-left: 1.3rem; display: grid; gap: .3rem; }
+
+  footer {
+    text-align: center; color: var(--muted); font-size: .85rem; padding-block: 0 1.5rem;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .option, .card { animation: pop .18s ease-out; }
+    @keyframes pop { from { transform: translateY(4px); opacity: .6; } to { transform: none; opacity: 1; } }
+  }
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-inner">
+    <p class="eyebrow">Navidad en familia</p>
+    <h1>Intercambio de regalos</h1>
+    <p class="lede">Escribe tu nombre y al menos tres opciones de regalo que te gustaría recibir. Al guardar, verás lo que quiere la persona que te tocó y la lista de toda la familia.</p>
+    <div class="budget" role="note">
+      <span class="amt">$1,000</span>
+      <span class="lbl">pesos por regalo. Elige opciones que entren en ese presupuesto.</span>
+    </div>
+  </div>
+</header>
+
+<main class="sheet-wrap">
+  <form class="sheet" id="form" novalidate>
+    <fieldset>
+      <legend>¿Quién eres?</legend>
+      <label for="nombre"><span>Nombre <span class="sub">(como quieras que te reconozcan)</span></span>
+        <input type="text" id="nombre" name="nombre" autocomplete="off" list="nombres" placeholder="Por ejemplo: Nellis, Andrea, Tía Rosy" required maxlength="60">
+      </label>
+      <datalist id="nombres"></datalist>
+      <p class="err" id="err-nombre" aria-live="polite"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Tus opciones de regalo</legend>
+      <p class="hint">Mínimo tres. Describe el regalo y, si quieres, pega el link de dónde comprarlo. Recuerda que el tope es de $1,000 pesos.</p>
+      <div class="options" id="options"></div>
+      <p class="err" id="err-options" aria-live="polite"></p>
+      <div class="row">
+        <button type="button" class="btn btn-ghost" id="add">+ Agregar otra opción</button>
+      </div>
+    </fieldset>
+
+    <div>
+      <div class="row">
+        <button type="submit" class="btn btn-main" id="save">Guardar mi lista</button>
+        <button type="button" class="btn btn-ghost" id="borrar" hidden>Borrar mi lista</button>
+      </div>
+      <p class="status" id="status" aria-live="polite"></p>
+      <p class="notice" id="notice" hidden></p>
+    </div>
+  </form>
+
+  <section id="target-section" hidden aria-labelledby="target-title">
+    <div class="target-box">
+      <p class="eyebrow" style="color:var(--gold)">Te toca regalarle a</p>
+      <p class="big" id="target-title"></p>
+      <div id="target-body"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="list-title">
+    <div class="list-head">
+      <h2 id="list-title">Lo que quiere cada quien</h2>
+      <p class="hint">Aquí se juntan las listas de toda la familia. Cada quien puede volver a entrar desde el mismo teléfono para corregir la suya.</p>
+      <div class="row">
+        <p class="count" id="count"></p>
+        <button type="button" class="btn btn-ghost" id="refresh" style="padding:.45rem .9rem;font-size:.9rem">Actualizar</button>
+      </div>
+    </div>
+    <div class="cards" id="cards">
+      <p class="empty-state" id="list-state">Cargando las listas de la familia…</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairs-title">
+    <div class="list-head">
+      <h2 id="pairs-title">¿A quién le regalas?</h2>
+      <p class="hint">La lista completa del sorteo 2026. Busca tu nombre para ver a quién te toca.</p>
+    </div>
+    <div class="sheet" style="margin-top:.9rem">
+      <label class="search" for="buscar">Busca tu nombre
+        <input type="text" id="buscar" autocomplete="off" placeholder="Por ejemplo: Chayo">
+      </label>
+      <div id="grupos"></div>
+      <p class="no-match" id="no-match"></p>
+    </div>
+  </section>
+</main>
+
+<footer>Con cariño, para que a nadie le toque adivinar.</footer>
+
+<script>
+(function () {
+  /* Shared store: a public JSON document. Everyone with the link reads and writes it;
+     the page keeps a private id per phone so each person can edit only their own entry. */
+  /* Firebase Realtime Database, used through its REST API (no SDK, no login).
+     DB_URL is the database URL from the Firebase console, without a trailing slash.
+     Everything lives under /intercambio/listas/<id>. */
+  var DB_URL = '';
+  var DB_PATH = '/intercambio/listas';
+  function keyUrl(id) { return DB_URL + DB_PATH + (id ? '/' + encodeURIComponent(id) : '') + '.json'; }
+  var MIN = 3, MAX = 6;
+  var ADMIN = location.hash === '#admin';
+
+  var optionsEl = document.getElementById('options');
+  var form = document.getElementById('form');
+  var nombre = document.getElementById('nombre');
+  var status = document.getElementById('status');
+  var notice = document.getElementById('notice');
+  var errNombre = document.getElementById('err-nombre');
+  var errOptions = document.getElementById('err-options');
+  var addBtn = document.getElementById('add');
+  var saveBtn = document.getElementById('save');
+  var borrarBtn = document.getElementById('borrar');
+  var cards = document.getElementById('cards');
+  var countEl = document.getElementById('count');
+  var refreshBtn = document.getElementById('refresh');
+  var targetSection = document.getElementById('target-section');
+  var targetTitle = document.getElementById('target-title');
+  var targetBody = document.getElementById('target-body');
+  var count = 0;
+  var myId = null;
+  var LISTAS = {};
+  var prefilled = false;
+
+  function isUrl(s) { return /^https?:\/\/\S+$/i.test(s); }
+  function norm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); }
+  function setStatus(text, bad) { status.textContent = text; status.classList.toggle('bad', !!bad); }
+  function showNotice(text) { notice.textContent = text; notice.hidden = !text; }
+
+  try {
+    myId = localStorage.getItem('intercambio-id');
+    if (!myId) { myId = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem('intercambio-id', myId); }
+  } catch (e) { myId = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  /* ---------- sorteo 2026 ---------- */
+  var GRUPOS = [
+    { titulo: 'Grupo 1', pares: [
+      ['Abu', 'Regis'], ['Oscar', 'Tío Luis'], ['Ana Velia', 'Saúl'], ['Ana', 'Chayo'], ['Hugo', 'Oscarin'],
+      ['Beto', 'Reynolin'], ['Pato', 'Marco'], ['Luis', 'Daniel'], ['Gisselle', 'Tía Antonieta'], ['Reynol', 'Vero'],
+      ['Chayo', 'Lily'], ['Reynolin', 'Pablo'], ['Pao', 'Lalo'], ['Saúl', 'Tío Pancho'], ['Coco', 'Abu'],
+      ['Joan', 'Pato'], ['Nella', 'Vis'], ['Aldrin', 'Reynol'], ['Oscarin', 'Marga'], ['Vero', 'Sara'],
+      ['Sara', 'Isaac'], ['Vis', 'Gisselle'], ['Marga', 'Tía Rosy'], ['Daniel', 'Aldrin'], ['Lalo', 'Beto'],
+      ['Pita', 'Ana Velia'], ['Pablo', 'Monis'], ['Regis', 'Catlin'], ['Marco', 'Pao'], ['Monis', 'Pita'],
+      ['John', 'Oscar'], ['Catlin', 'Ana'], ['Isaac', 'Luis'], ['Lily', 'Nella'], ['Tío Luis', 'Coco'],
+      ['Tía Antonieta', 'Joan'], ['Tío Pancho', 'John'], ['Tía Rosy', 'Hugo']
+    ] },
+    { titulo: 'Grupo 2', pares: [
+      ['Majo', 'Amelia'], ['R4', 'Simón'], ['Sofi', 'Siggy'], ['Aura', 'R4'], ['Siggy', 'Majo'], ['Simón', 'Sofi'], ['Amelia', 'Aura']
+    ] }
+  ];
+  var GIVES = {};
+  GRUPOS.forEach(function (g) { g.pares.forEach(function (p) { GIVES[norm(p[0])] = p[1]; }); });
+
+  /* ---------- form ---------- */
+  function makeOption(values) {
+    count += 1;
+    var i = count;
+    var wrap = document.createElement('div');
+    wrap.className = 'option';
+    wrap.innerHTML =
+      '<div class="option-head"><span class="n">Opción <span class="num"></span><small class="tag"></small></span>' +
+      '<button type="button" class="remove" aria-label="Quitar esta opción">Quitar</button></div>' +
+      '<label for="g' + i + '">¿Qué te gustaría? <input type="text" id="g' + i + '" maxlength="140" placeholder="Por ejemplo: una taza térmica, un libro de cocina, calcetines bonitos"></label>' +
+      '<label for="l' + i + '"><span>Link <span class="sub">(opcional)</span></span> <input type="url" id="l' + i + '" inputmode="url" maxlength="500" placeholder="https://..."></label>' +
+      '<p class="err" aria-live="polite"></p>';
+    if (values) {
+      wrap.querySelector('input[type="text"]').value = values.regalo || '';
+      wrap.querySelector('input[type="url"]').value = values.link || '';
+    }
+    wrap.querySelector('.remove').addEventListener('click', function () {
+      if (optionsEl.children.length <= MIN) { errOptions.textContent = 'Necesitas al menos tres opciones.'; return; }
+      wrap.remove(); renumber();
+    });
+    optionsEl.appendChild(wrap);
+    renumber();
+  }
+  function renumber() {
+    var items = optionsEl.querySelectorAll('.option');
+    items.forEach(function (el, idx) {
+      el.querySelector('.num').textContent = idx + 1;
+      el.querySelector('.tag').textContent = idx < MIN ? 'obligatoria' : 'extra';
+      el.querySelector('.remove').hidden = items.length <= MIN;
+    });
+    addBtn.disabled = items.length >= MAX;
+    addBtn.textContent = items.length >= MAX ? 'Máximo ' + MAX + ' opciones' : '+ Agregar otra opción';
+  }
+  function readOptions() {
+    return Array.prototype.map.call(optionsEl.querySelectorAll('.option'), function (el) {
+      return { regalo: el.querySelector('input[type="text"]').value.trim(), link: el.querySelector('input[type="url"]').value.trim(), el: el };
+    });
+  }
+  function validate() {
+    var ok = true;
+    var name = nombre.value.trim();
+    if (!name) { ok = false; errNombre.textContent = 'Escribe tu nombre para que sepan de quién es la lista.'; nombre.setAttribute('aria-invalid', 'true'); }
+    else { errNombre.textContent = ''; nombre.removeAttribute('aria-invalid'); }
+    var opts = readOptions();
+    var filled = 0;
+    opts.forEach(function (o, idx) {
+      var err = o.el.querySelector('.err');
+      var giftInput = o.el.querySelector('input[type="text"]');
+      var linkInput = o.el.querySelector('input[type="url"]');
+      var msg = '', bad = null;
+      if (o.regalo) filled += 1;
+      if (idx < MIN && !o.regalo) { msg = 'Esta opción es obligatoria.'; bad = giftInput; }
+      if (o.link && !o.regalo) { msg = 'Describe el regalo del link, aunque sea en pocas palabras.'; bad = giftInput; }
+      if (o.link && !isUrl(o.link)) { msg = 'El link debe empezar con http:// o https://'; bad = linkInput; }
+      err.textContent = msg;
+      giftInput.removeAttribute('aria-invalid'); linkInput.removeAttribute('aria-invalid');
+      if (bad) { ok = false; bad.setAttribute('aria-invalid', 'true'); }
+    });
+    if (filled < MIN) { ok = false; errOptions.textContent = 'Escribe al menos tres opciones de regalo.'; }
+    else errOptions.textContent = '';
+    return { ok: ok, name: name, opts: opts.filter(function (o) { return o.regalo; }).map(function (o) { return { regalo: o.regalo, link: o.link }; }) };
+  }
+  function prefill(d) {
+    if (prefilled) return;
+    prefilled = true;
+    nombre.value = d.nombre || '';
+    optionsEl.innerHTML = '';
+    var opts = Array.isArray(d.opciones) ? d.opciones.slice(0, MAX) : [];
+    while (opts.length < MIN) opts.push({ regalo: '', link: '' });
+    opts.forEach(function (o) { makeOption(o || {}); });
+    saveBtn.textContent = 'Actualizar mi lista';
+    borrarBtn.hidden = false;
+  }
+  for (var k = 0; k < MIN; k++) makeOption();
+  addBtn.addEventListener('click', function () {
+    if (optionsEl.children.length >= MAX) return;
+    makeOption(); optionsEl.lastElementChild.querySelector('input').focus();
+  });
+  form.addEventListener('input', function () { if (status.textContent) setStatus(''); });
+
+  /* ---------- store ---------- */
+  function fetchStore() {
+    if (!DB_URL) return Promise.reject(new Error('no-store'));
+    return fetch(keyUrl(), { headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (data) { return (data && typeof data === 'object') ? data : {}; });
+  }
+  /* Each phone writes only its own key, so two people saving at the same time never erase each other. */
+  function saveEntry(id, entry) {
+    return fetch(keyUrl(id), { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(entry) })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); });
+  }
+  function deleteEntry(id) {
+    return fetch(keyUrl(id), { method: 'DELETE', headers: { 'Accept': 'application/json' } })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); });
+  }
+  function refetch() { return fetchStore().then(function (listas) { LISTAS = listas; return LISTAS; }); }
+
+  function load(manual) {
+    if (!DB_URL) {
+      cards.innerHTML = '';
+      var p = document.createElement('p'); p.className = 'empty-state';
+      p.textContent = 'La encuesta todavía no está activada. Avísale a Andrea.';
+      cards.appendChild(p);
+      showNotice('La encuesta todavía no está activada. Avísale a Andrea.');
+      saveBtn.disabled = true;
+      return;
+    }
+    if (manual) { refreshBtn.disabled = true; refreshBtn.textContent = 'Actualizando…'; }
+    fetchStore().then(function (listas) {
+      LISTAS = listas;
+      if (LISTAS[myId]) prefill(LISTAS[myId]);
+      renderAll();
+    }).catch(function () {
+      cards.innerHTML = '';
+      var p = document.createElement('p'); p.className = 'empty-state';
+      p.textContent = 'No se pudieron cargar las listas. Revisa tu conexión y toca "Actualizar".';
+      cards.appendChild(p);
+    }).then(function () { refreshBtn.disabled = false; refreshBtn.textContent = 'Actualizar'; });
+  }
+  refreshBtn.addEventListener('click', function () { load(true); });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = validate();
+    if (!v.ok) { setStatus(''); var firstBad = form.querySelector('[aria-invalid="true"]'); if (firstBad) firstBad.focus(); return; }
+    saveBtn.disabled = true;
+    setStatus('Guardando…');
+    var entry = { nombre: v.name, opciones: v.opts, actualizado: new Date().toISOString() };
+    saveEntry(myId, entry).then(refetch).then(function () {
+      setStatus('Lista guardada. Ya aparece abajo con las de la familia.');
+      saveBtn.textContent = 'Actualizar mi lista';
+      borrarBtn.hidden = false;
+      prefilled = true;
+      renderAll();
+      var t = GIVES[norm(v.name)];
+      if (t) targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function () {
+      setStatus('No se pudo guardar. Revisa tu conexión e inténtalo otra vez.', true);
+    }).then(function () { saveBtn.disabled = false; });
+  });
+
+  borrarBtn.addEventListener('click', function () {
+    if (borrarBtn.dataset.confirm !== '1') { borrarBtn.dataset.confirm = '1'; borrarBtn.textContent = '¿Seguro? Toca otra vez'; return; }
+    borrarBtn.disabled = true;
+    deleteEntry(myId).then(refetch).then(function () {
+      setStatus('Tu lista se borró.');
+      borrarBtn.hidden = true; borrarBtn.dataset.confirm = ''; borrarBtn.textContent = 'Borrar mi lista';
+      saveBtn.textContent = 'Guardar mi lista';
+      renderAll();
+    }).catch(function () {
+      setStatus('No se pudo borrar. Inténtalo otra vez.', true);
+      borrarBtn.dataset.confirm = ''; borrarBtn.textContent = 'Borrar mi lista';
+    }).then(function () { borrarBtn.disabled = false; });
+  });
+
+  /* ---------- render ---------- */
+  function fmtDate(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    try { return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' }); } catch (e) { return ''; }
+  }
+  function entries() {
+    return Object.keys(LISTAS).map(function (id) { var d = LISTAS[id] || {}; return { id: id, nombre: String(d.nombre || ''), opciones: Array.isArray(d.opciones) ? d.opciones : [], actualizado: d.actualizado }; })
+      .sort(function (a, b) { return (a.actualizado || '').localeCompare(b.actualizado || ''); });
+  }
+  function optionsList(opts) {
+    var ol = document.createElement('ol');
+    opts.slice(0, MAX).forEach(function (o) {
+      if (!o || typeof o.regalo !== 'string' || !o.regalo.trim()) return;
+      var li = document.createElement('li'); li.textContent = o.regalo.trim();
+      if (typeof o.link === 'string' && isUrl(o.link.trim())) {
+        li.appendChild(document.createTextNode(' '));
+        var a = document.createElement('a'); a.href = o.link.trim(); a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = 'Ver link';
+        li.appendChild(a);
+      }
+      ol.appendChild(li);
+    });
+    return ol;
+  }
+  function renderTarget() {
+    var mine = LISTAS[myId];
+    var to = mine ? GIVES[norm(mine.nombre)] : null;
+    if (!to) { targetSection.hidden = true; return; }
+    targetSection.hidden = false;
+    targetTitle.textContent = to;
+    targetBody.innerHTML = '';
+    var found = entries().filter(function (e) { return norm(e.nombre) === norm(to); });
+    if (found.length === 0) {
+      var p = document.createElement('p'); p.className = 'hint';
+      p.textContent = to + ' todavía no guarda su lista. Vuelve a revisar más tarde o toca "Actualizar".';
+      targetBody.appendChild(p);
+    } else {
+      found.forEach(function (e) {
+        var lbl = document.createElement('p'); lbl.className = 'label'; lbl.textContent = 'Lo que quiere ' + e.nombre + ':';
+        targetBody.appendChild(lbl);
+        targetBody.appendChild(optionsList(e.opciones));
+      });
+    }
+  }
+  function renderList() {
+    var list = entries();
+    cards.innerHTML = '';
+    countEl.textContent = list.length === 0 ? '' : (list.length === 1 ? '1 persona ya puso su lista' : list.length + ' personas ya pusieron su lista');
+    if (list.length === 0) {
+      var p = document.createElement('p'); p.className = 'empty-state';
+      p.textContent = 'Todavía nadie ha guardado su lista. Sé la primera persona.';
+      cards.appendChild(p); return;
+    }
+    list.forEach(function (e) {
+      var mine = e.id === myId;
+      var card = document.createElement('article');
+      card.className = 'card' + (mine ? ' mine' : '');
+      var head = document.createElement('div'); head.className = 'card-head';
+      var who = document.createElement('span'); who.className = 'who'; who.textContent = e.nombre.trim() || 'Alguien de la familia';
+      if (mine) { var chip = document.createElement('span'); chip.className = 'chip'; chip.textContent = 'tú'; who.appendChild(chip); }
+      head.appendChild(who);
+      var to = GIVES[norm(e.nombre)];
+      if (to) { var g = document.createElement('span'); g.className = 'gives'; g.textContent = 'Le regala a ' + to; head.appendChild(g); }
+      if (ADMIN && !mine) {
+        var del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = 'Quitar';
+        del.addEventListener('click', function () {
+          if (del.dataset.confirm !== '1') { del.dataset.confirm = '1'; del.textContent = '¿Seguro? Toca otra vez'; return; }
+          del.disabled = true;
+          deleteEntry(e.id).then(refetch).then(renderAll).catch(function () { del.disabled = false; del.textContent = 'Quitar'; del.dataset.confirm = ''; });
+        });
+        head.appendChild(del);
+      }
+      card.appendChild(head);
+      card.appendChild(optionsList(e.opciones));
+      var when = fmtDate(e.actualizado);
+      if (when) { var w = document.createElement('p'); w.className = 'when'; w.textContent = 'Actualizado el ' + when; card.appendChild(w); }
+      cards.appendChild(card);
+    });
+  }
+  function renderAll() { renderTarget(); renderList(); }
+
+  /* ---------- sorteo table ---------- */
+  var gruposEl = document.getElementById('grupos');
+  var buscar = document.getElementById('buscar');
+  var noMatch = document.getElementById('no-match');
+  var datalist = document.getElementById('nombres');
+  (function buildPairs() {
+    var names = [];
+    GRUPOS.forEach(function (g) {
+      var h = document.createElement('p'); h.className = 'group-title'; h.textContent = g.titulo;
+      var wrap = document.createElement('div'); wrap.className = 'table-wrap';
+      var t = document.createElement('table');
+      t.innerHTML = '<thead><tr><th>Persona</th><th>Le regala a</th></tr></thead>';
+      var tb = document.createElement('tbody');
+      g.pares.forEach(function (p) {
+        var tr = document.createElement('tr');
+        var a = document.createElement('td'); a.textContent = p[0];
+        var b = document.createElement('td'); b.className = 'to'; b.textContent = '🎁 ' + p[1];
+        tr.appendChild(a); tr.appendChild(b); tr.dataset.n = norm(p[0]); tr.dataset.t = norm(p[1]);
+        tb.appendChild(tr);
+        if (names.indexOf(p[0]) < 0) names.push(p[0]);
+      });
+      t.appendChild(tb); wrap.appendChild(t);
+      var sec = document.createElement('div'); sec.appendChild(h); sec.appendChild(wrap); sec.dataset.group = '1';
+      gruposEl.appendChild(sec);
+    });
+    names.sort(function (x, y) { return x.localeCompare(y, 'es'); }).forEach(function (n) {
+      var o = document.createElement('option'); o.value = n; datalist.appendChild(o);
+    });
+  })();
+  buscar.addEventListener('input', function () {
+    var q = norm(buscar.value);
+    var shown = 0;
+    gruposEl.querySelectorAll('tbody tr').forEach(function (tr) {
+      var hit = q && tr.dataset.n.indexOf(q) === 0;
+      var show = !q || hit || tr.dataset.t.indexOf(q) === 0;
+      tr.hidden = !show; tr.classList.toggle('hit', !!hit);
+      if (show) shown += 1;
+    });
+    gruposEl.querySelectorAll('[data-group]').forEach(function (sec) { sec.hidden = !sec.querySelector('tbody tr:not([hidden])'); });
+    noMatch.textContent = shown === 0 ? 'Ese nombre no está en la lista. Prueba como aparece en el sorteo.' : '';
+  });
+
+  load(false);
+})();
+</script>
+</body>
+</html>
