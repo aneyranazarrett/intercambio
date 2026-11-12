@@ -240,7 +240,7 @@
   /* Firebase Realtime Database, used through its REST API (no SDK, no login).
      DB_URL is the database URL from the Firebase console, without a trailing slash.
      Everything lives under /intercambio/listas/<id>. */
-  var DB_URL = '';
+  var DB_URL = 'https://intercambio-familia-default-rtdb.firebaseio.com';
   var DB_PATH = '/intercambio/listas';
   function keyUrl(id) { return DB_URL + DB_PATH + (id ? '/' + encodeURIComponent(id) : '') + '.json'; }
   var MIN = 3, MAX = 6;
